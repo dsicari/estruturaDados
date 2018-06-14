@@ -10,8 +10,7 @@
 //---------------------------------------------------------------------
 void AbrePacoteFigura(TPacote *pct)
 {	
-    memset(pct, 0, TOTAL_FIGURAS_PACOTE);
-    
+    memset(pct, 0, TOTAL_FIGURAS_PACOTE);    
     int i = 0;
     for(i = 0; i < TOTAL_FIGURAS_PACOTE; i++){
             pct->figura[i] = (rand() % TOTAL_FIGURAS_ALBUM);  
@@ -23,7 +22,7 @@ void ImprimePacote(TPacote *pct)
 {
     int i = 0;
     for(i = 0; i < TOTAL_FIGURAS_PACOTE; i++){
-            printf(" %i ", pct->figura[i]);	
+        printf(" %i ", pct->figura[i]);	
     }	
 }
 
@@ -31,7 +30,7 @@ void ImprimePacote(TPacote *pct)
 //			ALBUM
 //---------------------------------------------------------------------
 void InicializarAlbum(TAlbum *album){
-    //Iniciar seed rand
+    //Iniciar seed rand (numero aleatorio)
     srand(time(NULL));
     album->totalFiguras = 0;  
     int i;
@@ -49,6 +48,8 @@ int TamanhoAlbum(TAlbum *album){
     return album->totalFiguras;
 }
 
+//---------------------------------------------------------------------
+            /* CODIGO ZUADO, DESCONSIDERAR */
 //---------------------------------------------------------------------
 /*bool ColarFigura(TAlbum *album, int figura){
     int pos = TamanhoAlbum(album);
@@ -84,6 +85,8 @@ int TamanhoAlbum(TAlbum *album){
     }
     return true;
 }*/
+
+//---------------------------------------------------------------------
 bool ColarFigura(TAlbum *album, int pos){    
     if(!album->figura[pos].contem){
         album->figura[pos].numero = pos;
