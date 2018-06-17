@@ -1,4 +1,9 @@
 #include "utl.h"
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
+#include <stdio.h>
+#include <cstring>
+#include <iostream>
 
 //---------------------------------------------------------------------
 //			PACOTE FIGURAS
@@ -26,8 +31,25 @@ void ImprimePacote(TPacote *pct)
 //---------------------------------------------------------------------
 void InicializarAlbum(TAlbum *album){
     //Iniciar seed rand (numero aleatorio)
-    srand(time(NULL));  
-    memset(album, 0, sizeof(TAlbum));
+    srand(time(NULL));    
+    int i;
+    for(i = 0; i <= TOTAL_FIGURAS_ALBUM; i++){
+        album->figura[i].contem = false;
+        album->figura[i].numero = i;
+        album->figura[i].repetida = false;
+        album->figura[i].qtdeRepetida = 0;
+    }
+    // *** 
+    //     CODIGO TA COM O DEMONIO, NAO ASSIMILA DIREITO 
+    //     TOTAL FIGURAS E POSICAO 681 
+    // ***     
+    album->figura[681].contem = false;
+    album->figura[681].numero = i;
+    album->figura[681].repetida = false;
+    album->figura[681].qtdeRepetida = 0;
+    //Se colocar totalFiguras antes assimila 682
+    album->totalFiguras = 0; 
+
 }
 
 //---------------------------------------------------------------------
@@ -36,12 +58,56 @@ int TamanhoAlbum(TAlbum *album){
 }
 
 //---------------------------------------------------------------------
-bool ColarFigura(TAlbum *album, int pos){  
-    album->totalFiguras = album->totalFiguras + 1;
-    album->figura[pos].qtde++;    
+            /* CODIGO ZUADO, DESCONSIDERAR */
+//---------------------------------------------------------------------
+/*bool ColarFigura(TAlbum *album, int figura){
+    int pos = TamanhoAlbum(album);
+    
+    if(album->totalFiguras >= TOTAL_FIGURAS_ALBUM) {
+        return false;
+    }   
+    
+    int r = BuscaFigura(album, figura);
+    if(r == NAO_ACHOU_FIGURA){
+        while(pos > 0 && album->figura[pos-1].numero > figura) {
+            album->figura[pos] = album->figura[pos-1];
+            pos--;
+        }
+        album->figura[pos].numero = figura;    
+        album->totalFiguras++;
+    }
+    /*while(pos > 0 && album->figura[pos-1].numero > figura) {
+        album->figura[pos] = album->figura[pos-1];
+        pos--;
+    }
+    
+    int r = BuscaFigura(album, figura);
+    if(r == NAO_ACHOU_FIGURA){
+        album->figura[r].numero = figura;
+        album->figura[r].contem = true;
+        album->figura[r].qtdeRepetida = 0;
+        album->totalFiguras++;
+    }
+    else{
+        album->figura[r].repetida = true;
+        album->figura[r].qtdeRepetida++;
+    }
+    return true;
+}*/
+
+//---------------------------------------------------------------------
+bool ColarFigura(TAlbum *album, int pos){    
+    if(!album->figura[pos].contem){
+        album->figura[pos].contem = true;
+        album->figura[pos].qtdeRepetida = 0;
+        album->totalFiguras++;
+    }
+    else{
+        album->figura[pos].repetida = true;
+        album->figura[pos].qtdeRepetida++;
+    }
     return true;
 }
-
 //---------------------------------------------------------------------
 void ColarPacote(TAlbum *album, TPacote *pct){
     int i;
@@ -66,69 +132,39 @@ void ImprimirAlbum(TAlbum *album){
     int i;
     int count = 0;
     for(i = 0 ; i <= TOTAL_FIGURAS_ALBUM; i++) { 
-        if(album->figura[i].qtde > 0){
+        if(album->figura[i].contem){
             printf("\n\t\t--------------------------------------------------------\n");
             printf("\t\t|\tIDX\t|\tFIGURA\t|\tREPETIDAS\t|\n");
-            printf("\t\t|\t%i\t|\t%i\t|\t%i\t\t|", count++, i, (album->figura[i].qtde - 1));
+            printf("\t\t|\t%i\t|\t%i\t|\t%i\t\t|", count++, album->figura[i].numero, album->figura[i].qtdeRepetida);
         }        
     }
     printf("\n\t\t--------------------------------------------------------\n");
 }
 
 //---------------------------------------------------------------------
-void ImprimirFigura(TAlbum *album, int pos){
-    printf(" figura %i qtde: %i\n", pos, album->figura[pos].qtde);
-}
-
-//---------------------------------------------------------------------
-bool SalvarAlbum(TAlbum *album){
-    bool rslt = false;
-    FILE * file = fopen("album.alb", "wb");
-    if(file != NULL) {
-        int r = fwrite(album, sizeof(TAlbum), 1, file);
-        if(r != 0){
-            printf("Album salvo com sucesso!\n");
-            rslt = true;
-        }
-        else{
-            printf("Erro ao salvar album!\n");  
-        }        
-        fclose(file);
-    }  
-    return rslt;
-}
-
-//---------------------------------------------------------------------
-bool AbrirAlbum(TAlbum *album){
-    bool rslt = false;
-    FILE * file= fopen("album.alb", "rb");
-    if (file != NULL) {
-        fread(album, sizeof(TAlbum), 1, file);
-        int totalFiguras = 0;
-        for(int i = 0; i <= TOTAL_FIGURAS_ALBUM; i++){
-            if(album->figura[i].qtde > 0){
-                totalFiguras++;
+int BuscaFigura(TAlbum* album, int figura){
+    int esq, dir, meio;
+    esq = 0;
+    dir = TOTAL_FIGURAS_ALBUM;//;
+    while(esq <= dir) {
+        meio = ((esq + dir) / 2);
+        if(figura == album->figura[meio].numero) {
+            if(album->figura[meio].contem){
+                return meio;   
+            }
+            else{
+                break;
+            }            
+        } else {
+            if(album->figura[meio].numero < figura){
+                esq = meio + 1;
+            } else {
+                dir = meio + 1;
             }
         }
-        if(totalFiguras == album->totalFiguras){
-            rslt = true;
-        }
-        fclose(file);
     }
-    return rslt;
+    return -1;
 }
-
-//---------------------------------------------------------------------
-bool BuscaFigura(TAlbum* album, int figura){
-    for(int i = 0; i <= TOTAL_FIGURAS_ALBUM; i++){
-        if(album->figura[i].qtde > 0){
-            return true;
-        }
-    }    
-    return false;
-}
-
-
 //---------------------------------------------------------------------
 void IrABanca(TAlbum *album, TPacote *pct, int times){
     for(int i = 0; i < times; i++){
@@ -151,17 +187,18 @@ void RelatorioAlbum(TAlbum *album, int tipo){
     if(tipo == FIGURAS_COLADAS){
         printf("\nFiguras Coladas: ");
         for(int i = 1; i <= TOTAL_FIGURAS_ALBUM; i++){
-            if(album->figura[i].qtde > 0){                
-                printf("%i ", i);
+            if(album->figura[i].contem){                
+                printf("%i ", album->figura[i].numero);
             }
         }
     }
     else{
         printf("\nFiguras Faltando: ");
         for(int i = 1; i <= TOTAL_FIGURAS_ALBUM; i++){
-            if(album->figura[i].qtde == 0){                
-                printf("%i ", i);
+            if(!album->figura[i].contem){                
+                printf("%i ", album->figura[i].numero);
             }
         }
     }
 }
+

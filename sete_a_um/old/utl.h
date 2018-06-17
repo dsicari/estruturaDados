@@ -1,14 +1,5 @@
 #ifndef UTL_H
 #define UTL_H
-
-#include <stdlib.h>     /* srand, rand */
-#include <time.h>       /* time */
-#include <stdio.h>
-#include <cstring>
-#include <iostream>
-
-
-
 // ------------------------------------------ 
 // DEFINES
 // ------------------------------------------
@@ -23,14 +14,15 @@
 // ESTRUTURAS
 // ------------------------------------------
 
-// PACOTE FIGURAS
 typedef struct{
     int figura[TOTAL_FIGURAS_PACOTE];
 }TPacote;
 
-// ALBUM FIGURAS
 typedef struct{
-    int qtde;
+    int numero;
+    bool contem;
+    bool repetida;
+    int qtdeRepetida;
 }TFigura;
 
 typedef struct{
@@ -54,20 +46,11 @@ int TamanhoAlbum(TAlbum *album);
 bool ColarFigura(TAlbum *album, int figura);
 void ColarPacote(TAlbum *album, TPacote *pct);
 void ImprimirAlbum(TAlbum *album);
-void ImprimirFigura(TAlbum *album, int pos);
-bool BuscaFigura(TAlbum* album, int figura);
+int BuscaFigura(TAlbum* album, int figura);
 void IrABanca(TAlbum *album, TPacote *pct,int times);
 
 // ------------------------------------------ 
 // RELATORIO
 // ------------------------------------------
-
 void RelatorioAlbum(TAlbum *album, int tipo);
-
-// ------------------------------------------ 
-// ACESSO ARQUIVO
-// ------------------------------------------
-
-bool SalvarAlbum(TAlbum *album);
-bool AbrirAlbum(TAlbum *album);
 #endif
