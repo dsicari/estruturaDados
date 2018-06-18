@@ -1,5 +1,8 @@
 #include "utl.h"
 
+
+TFigurasRepetidas *FigurasRepetidas;// = new TFigurasRepetidas();
+
 //---------------------------------------------------------------------
 //			PACOTE FIGURAS
 //---------------------------------------------------------------------
@@ -28,6 +31,7 @@ void InicializarAlbum(TAlbum *album){
     //Iniciar seed rand (numero aleatorio)
     srand(time(NULL));  
     memset(album, 0, sizeof(TAlbum));
+    FigurasRepetidas->init();
 }
 
 //---------------------------------------------------------------------
@@ -37,8 +41,24 @@ int TamanhoAlbum(TAlbum *album){
 
 //---------------------------------------------------------------------
 bool ColarFigura(TAlbum *album, int pos){  
-    album->totalFiguras = album->totalFiguras + 1;
-    album->figura[pos].qtde++;    
+    if(pos < 0 && pos > 681){
+        return false;
+    }
+    if(album->figura[pos] == 0 && pos != 0){
+        album->totalFigurasColadas++;        
+    }
+    else if((album->figura[pos] > 0 && pos != 0)){
+        FigurasRepetidas->inserir_no_final(pos); 
+        album->totalFigurasRepetidas++;      
+    }
+    
+    if(pos!=0){
+        album->totalFiguras++;
+    }
+    
+    album->figura[pos]++; 
+    
+      
     return true;
 }
 
@@ -48,6 +68,7 @@ void ColarPacote(TAlbum *album, TPacote *pct){
     for(i = 0; i < TOTAL_FIGURAS_PACOTE; i++){
         ColarFigura(album, pct->figura[i]);
     }
+    album->pacotesAbertos++;
 }
 
 //---------------------------------------------------------------------
@@ -65,11 +86,11 @@ void ImprimirAlbum(TAlbum *album){
                                                                                                    
     int i;
     int count = 0;
-    for(i = 0 ; i <= TOTAL_FIGURAS_ALBUM; i++) { 
-        if(album->figura[i].qtde > 0){
+    for(i = 0 ; i < TOTAL_FIGURAS_ALBUM; i++) { 
+        if(album->figura[i] > 0){
             printf("\n\t\t--------------------------------------------------------\n");
             printf("\t\t|\tIDX\t|\tFIGURA\t|\tREPETIDAS\t|\n");
-            printf("\t\t|\t%i\t|\t%i\t|\t%i\t\t|", count++, i, (album->figura[i].qtde - 1));
+            printf("\t\t|\t%i\t|\t%i\t|\t%i\t\t|", count++, i, (album->figura[i] - 1));
         }        
     }
     printf("\n\t\t--------------------------------------------------------\n");
@@ -77,7 +98,7 @@ void ImprimirAlbum(TAlbum *album){
 
 //---------------------------------------------------------------------
 void ImprimirFigura(TAlbum *album, int pos){
-    printf(" figura %i qtde: %i\n", pos, album->figura[pos].qtde);
+    printf(" figura %i qtde: %i\n", pos, album->figura[pos]);
 }
 
 //---------------------------------------------------------------------
@@ -95,7 +116,39 @@ bool SalvarAlbum(TAlbum *album){
         }        
         fclose(file);
     }  
+    
+    if(rslt == false) return rslt;
+    
+    file = fopen("faltantes.txt", "w");
+    if(file != NULL) {
+        for(int i = 1; i < TOTAL_FIGURAS_ALBUM; i++){
+            if(album->figura[i] == 0){              
+                fprintf(file, "%i\n", i);
+            }
+        }
+        fclose(file);
+        rslt = true;
+    }
+    
+    if(rslt == false) return rslt;
+    
+    file = fopen("eu_tenho.txt", "w");
+    if(file != NULL) {
+        for(int i = 1; i < TOTAL_FIGURAS_ALBUM; i++){
+            if(album->figura[i] > 0){              
+                fprintf(file, "%i\n", i);
+            }
+        }
+        fclose(file);
+        rslt = true;
+    }
+    
+    if(rslt == false) return rslt;
+    
+    rslt = FigurasRepetidas->salvarRepetidas();
+    
     return rslt;
+    
 }
 
 //---------------------------------------------------------------------
@@ -103,25 +156,46 @@ bool AbrirAlbum(TAlbum *album){
     bool rslt = false;
     FILE * file= fopen("album.alb", "rb");
     if (file != NULL) {
+        std::cout << "arquivo album.alb aberto!" << std::endl;
         fread(album, sizeof(TAlbum), 1, file);
         int totalFiguras = 0;
-        for(int i = 0; i <= TOTAL_FIGURAS_ALBUM; i++){
-            if(album->figura[i].qtde > 0){
-                totalFiguras++;
+        for(int i = 1; i < TOTAL_FIGURAS_ALBUM; i++){
+            if(album->figura[i] > 0){
+                totalFiguras = totalFiguras + album->figura[i];
             }
         }
+        
         if(totalFiguras == album->totalFiguras){
             rslt = true;
+            std::cout << "OK: Figuras contadas = " << totalFiguras << " x " << album->totalFiguras << std::endl;
+        }
+        else{
+            std::cout << "ERROR: Diferenca figuras contadas = " << totalFiguras << " x " << " " << album->totalFiguras << std::endl;
         }
         fclose(file);
     }
+    
+    if(rslt == false) return rslt;
+    
+    // Abrir monte figuras repetidas
+    int figura = 0;
+    std::ifstream infile;
+    infile.open("repetidas.txt");
+    if(infile.is_open()){
+        while(infile >> figura){
+           FigurasRepetidas->inserir_no_final(figura);  
+        }
+        rslt = true;
+        infile.close();
+    }
+    
     return rslt;
 }
 
 //---------------------------------------------------------------------
 bool BuscaFigura(TAlbum* album, int figura){
     for(int i = 0; i <= TOTAL_FIGURAS_ALBUM; i++){
-        if(album->figura[i].qtde > 0){
+        if(album->figura[i] > 0){
             return true;
         }
     }    
@@ -146,22 +220,41 @@ void IrABanca(TAlbum *album, TPacote *pct, int times){
 void RelatorioAlbum(TAlbum *album, int tipo){
     // tipo 1: FIGURAS_COLADAS  Relatorio Figuras Coladas
     // tipo 2: FIGURAS_FALTANDO Relatorio Figuras Faltando
-    printf("\nRelatorio Album\n");
-    printf("Completo: %i / 681", album->totalFiguras);
+    printf("\nRelatorio Album");
+    printf("\nCompleto: %i / 681", album->totalFigurasColadas);
+    printf("\nTotal figuras: %i", album->totalFiguras);
+    printf("\nTotal figuras repetidas: %i", album->totalFigurasRepetidas);
+    printf("\nTotal pacotes abertos: %i", album->pacotesAbertos);
     if(tipo == FIGURAS_COLADAS){
         printf("\nFiguras Coladas: ");
-        for(int i = 1; i <= TOTAL_FIGURAS_ALBUM; i++){
-            if(album->figura[i].qtde > 0){                
+        //Figura 0 -> Figura que faltou ao abrir pacote, nao vai para relatorio
+        for(int i = 1; i < TOTAL_FIGURAS_ALBUM; i++){
+            if(album->figura[i] > 0){                
                 printf("%i ", i);
             }
         }
     }
-    else{
+    else if(tipo == FIGURAS_FALTANDO){
         printf("\nFiguras Faltando: ");
-        for(int i = 1; i <= TOTAL_FIGURAS_ALBUM; i++){
-            if(album->figura[i].qtde == 0){                
+        //Figura 0 -> Figura que faltou ao abrir pacote, nao vai para relatorio
+        for(int i = 1; i < TOTAL_FIGURAS_ALBUM; i++){
+            if(album->figura[i] == 0){                
                 printf("%i ", i);
             }
         }
+    }
+    else if(tipo == FIGURAS_REPETIDAS){
+        std::cout << "\nFigurinhas repetidas: " << std::endl;
+        FigurasRepetidas->mostrar();
+    }
+}
+//---------------------------------------------------------------------
+bool PesquisarFiguraRepetida(int figura){
+    int r = FigurasRepetidas->encontrar(figura);
+    if (r == NAO_ACHOU_FIGURA){
+        return false;
+    }
+    else{
+        return true;
     }
 }

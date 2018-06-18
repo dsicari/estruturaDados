@@ -6,36 +6,40 @@
 #include <stdio.h>
 #include <cstring>
 #include <iostream>
+#include <fstream>
 
 
+#include "lista.h"
+extern TFigurasRepetidas *FigurasRepetidas;// = new TFigurasRepetidas();
 
 // ------------------------------------------ 
 // DEFINES
 // ------------------------------------------
 
 #define TOTAL_FIGURAS_PACOTE 5
-#define TOTAL_FIGURAS_ALBUM 681
+#define TOTAL_FIGURAS_ALBUM 682
 #define NAO_ACHOU_FIGURA -1
 #define FIGURAS_COLADAS 1
 #define FIGURAS_FALTANDO 2
+#define FIGURAS_REPETIDAS 3
 
 // ------------------------------------------ 
 // ESTRUTURAS
 // ------------------------------------------
+
+
 
 // PACOTE FIGURAS
 typedef struct{
     int figura[TOTAL_FIGURAS_PACOTE];
 }TPacote;
 
-// ALBUM FIGURAS
 typedef struct{
-    int qtde;
-}TFigura;
-
-typedef struct{
-    TFigura figura[TOTAL_FIGURAS_ALBUM];  
+    int figura[TOTAL_FIGURAS_ALBUM];  
     int totalFiguras; 
+    int totalFigurasColadas;
+    int totalFigurasRepetidas;
+    int pacotesAbertos;
 }TAlbum;
 
 // ------------------------------------------ 
@@ -57,6 +61,7 @@ void ImprimirAlbum(TAlbum *album);
 void ImprimirFigura(TAlbum *album, int pos);
 bool BuscaFigura(TAlbum* album, int figura);
 void IrABanca(TAlbum *album, TPacote *pct,int times);
+bool PesquisarFiguraRepetida(int figura);
 
 // ------------------------------------------ 
 // RELATORIO
