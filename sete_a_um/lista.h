@@ -19,7 +19,8 @@ class TFigurasRepetidas{
         void inserir_no_final(int x);
         void inserir_na_posicao(int posicao, int valor);
         bool remover(int x);
-        int encontrar(int x);
+        bool encontrar(int x);
+        void encontrarPosicao(int x, int *idx);
         void mostrar();
         bool salvarRepetidas();
         void limpar_memorias();

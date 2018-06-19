@@ -47,8 +47,19 @@ bool ColarFigura(TAlbum *album, int pos){
     if(album->figura[pos] == 0 && pos != 0){
         album->totalFigurasColadas++;        
     }
-    else if((album->figura[pos] > 0 && pos != 0)){
-        FigurasRepetidas->inserir_no_final(pos); 
+    else if(album->figura[pos] > 0 && pos != 0 && FigurasRepetidas->esta_vazio()){
+        FigurasRepetidas->inserir_no_final(pos);
+    }
+    else if(album->figura[pos] > 0 && pos != 0 && !FigurasRepetidas->esta_vazio()){
+        int x = 0;
+        FigurasRepetidas->encontrarPosicao(pos, &x);
+        if(x == NAO_ACHOU_FIGURA){
+            FigurasRepetidas->inserir_no_final(pos);
+        }
+        else{
+            FigurasRepetidas->inserir_na_posicao(x, pos);
+        }        
+         
         album->totalFigurasRepetidas++;      
     }
     
@@ -181,9 +192,9 @@ bool AbrirAlbum(TAlbum *album){
     int figura = 0;
     std::ifstream infile;
     infile.open("repetidas.txt");
-    if(infile.is_open()){
-        while(infile >> figura){
-           FigurasRepetidas->inserir_no_final(figura);  
+    if(infile.is_open()){        
+        while(infile >> figura){      
+            FigurasRepetidas->inserir_no_final(figura);
         }
         rslt = true;
         infile.close();
@@ -194,11 +205,9 @@ bool AbrirAlbum(TAlbum *album){
 
 //---------------------------------------------------------------------
 bool BuscaFigura(TAlbum* album, int figura){
-    for(int i = 0; i <= TOTAL_FIGURAS_ALBUM; i++){
-        if(album->figura[i] > 0){
-            return true;
-        }
-    }    
+    if(album->figura[figura] > 0){
+        return true;
+    } 
     return false;
 }
 
@@ -249,12 +258,8 @@ void RelatorioAlbum(TAlbum *album, int tipo){
     }
 }
 //---------------------------------------------------------------------
-bool PesquisarFiguraRepetida(int figura){
-    int r = FigurasRepetidas->encontrar(figura);
-    if (r == NAO_ACHOU_FIGURA){
-        return false;
-    }
-    else{
-        return true;
+void dumpAlbum(TAlbum *album){
+    for(int i = 0; i < TOTAL_FIGURAS_ALBUM; i++){
+        printf("%i:%i\n", i, album->figura[i]);
     }
 }

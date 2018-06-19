@@ -62,6 +62,7 @@ void ImprimirFigura(TAlbum *album, int pos);
 bool BuscaFigura(TAlbum* album, int figura);
 void IrABanca(TAlbum *album, TPacote *pct,int times);
 bool PesquisarFiguraRepetida(int figura);
+void dumpAlbum(TAlbum *album);
 
 // ------------------------------------------ 
 // RELATORIO

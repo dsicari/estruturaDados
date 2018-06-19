@@ -25,6 +25,8 @@ int MainMenu(){
     cout << "10 - Imprimir monte de figurinhas repetidas\n";
     cout << "11 - Pesquisar no monte de figurinhas repetidas\n";
     cout << "12 - Remover figurinha do monte\n";
+    cout << "13 - Trocar figurinha\n";
+    cout << "14 - Dump Album\n";
     cout << "0 - Sair\n";
     cout << "# Insira a opcao desejada: ";
     cin >> opt;
@@ -93,7 +95,7 @@ int main()
             int figura = 0;
             cout << "Digite a figurinha a pesquisar no monte de repetidas: ";
             cin >> figura;
-            if(PesquisarFiguraRepetida(figura)){
+            if(FigurasRepetidas->encontrar(figura)){
                 cout << "Figurinha encontrada!" << endl;
             }
             else{
@@ -104,7 +106,7 @@ int main()
             int figura = 0;
             cout << "Qual figurinha deseja remover do monte de repetidas? Figurinha: ";
             cin >> figura;
-            if(PesquisarFiguraRepetida(figura)){
+            if(FigurasRepetidas->encontrar(figura)){
                 cout << "Figurinha encontrada!" << endl;
                 if(FigurasRepetidas->remover(figura)){
                     cout << "Figurinha removida com sucesso!";
@@ -114,8 +116,36 @@ int main()
                 }
             }
             else{
-                cout << "Figurinha nao encontrada no monte de repetidas!" << endl;
+               cout << "Figurinha nao encontrada no monte de repetidas!" << endl;
             }
+        }
+        else if(r == 13){
+            int figura = 0, repetida = 0;
+            cout << "Qual figurinha voce vai receber? Figura: ";
+            cin >> figura;
+            if(BuscaFigura(&Album, figura) == false){
+                cout << "Qual figurinha voce vai fornecer? Figura: ";
+                cin >> repetida;
+                if(FigurasRepetidas->encontrar(repetida)){
+                    FigurasRepetidas->remover(repetida);
+                    
+                    ColarFigura(&Album, figura);
+                    cout << "Parabens, agora voce possui a figurinha " << figura << endl;
+                    printf("\nCompleto: %i / 681", Album.totalFigurasColadas);
+                    printf("\nTotal figuras: %i", Album.totalFiguras);
+                    printf("\nTotal figuras repetidas: %i", Album.totalFigurasRepetidas);
+                }
+                else{
+                    cout << "ERRO: Voce nao tem esta figura repetida para fornecer!";
+                }
+            }
+            else{
+                cout << "ERRO: Voce ja tem esta figura colada!";
+            }
+                
+        }
+        else if(r == 14){
+            dumpAlbum(&Album);
         }
     }while(r != 0);
     

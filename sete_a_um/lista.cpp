@@ -79,7 +79,7 @@ bool TFigurasRepetidas::remover(int x){
     }
     
 }
-int TFigurasRepetidas::encontrar(int x){
+bool TFigurasRepetidas::encontrar(int x){
     int i=1;
     temp = head;
     while (temp->prox != NULL && temp->valor != x) {
@@ -88,11 +88,28 @@ int TFigurasRepetidas::encontrar(int x){
     }
     if(temp->valor == x)
     {
-        return i;
+        return true;
     }
     else if(temp->prox == NULL)
     {
-        return -1;
+        return false;
+    }
+}
+
+void TFigurasRepetidas::encontrarPosicao(int x, int *idx){
+    int i=1;
+    temp = head;
+    while (temp->prox != NULL && temp->valor != x) {
+        temp = temp->prox;
+        i++;
+    }
+    if(temp->valor == x)
+    {
+        *idx = i;
+    }
+    else if(temp->prox == NULL)
+    {
+        *idx = -1;
     }
 }
 void TFigurasRepetidas::mostrar(){
