@@ -6,26 +6,25 @@ typedef struct NO {
    struct NO* prox;
 }*LISTA;
 
-static LISTA head;
-static LISTA tail;
-static LISTA temp;
-    
-class TFigurasRepetidas{
-        
-    public:
-        void init();
-        bool esta_vazio();
-        void inserir(int x);
-        void inserir_no_final(int x);
-        void inserir_na_posicao(int posicao, int valor);
-        bool remover(int x);
-        bool encontrar(int x);
-        void encontrarPosicao(int x, int *idx);
-        void mostrar();
-        bool salvarRepetidas();
-        void limpar_memorias();
-    protected:
-    private:
-};
-#endif
+//---------------------------------------------------------------------
+bool FREstaVazio();
+//---------------------------------------------------------------------
+void FRInserir(int x);
+//---------------------------------------------------------------------
+void FRInserirNoFinal(int x);
+//---------------------------------------------------------------------
+void FRInserirPosicao(int posicao, int valor);
+//---------------------------------------------------------------------
+bool FRRemover(int x);
+//---------------------------------------------------------------------
+bool FREncontrar(int x);
+//---------------------------------------------------------------------
+int FREncontrarPosicao(int x);
+//---------------------------------------------------------------------
+void FRMostrar();
+//---------------------------------------------------------------------
+bool FRSalvar();
+//---------------------------------------------------------------------
+void FRLimparMemoria();
 
+#endif

@@ -7,10 +7,7 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
-
-
 #include "lista.h"
-extern TFigurasRepetidas *FigurasRepetidas;// = new TFigurasRepetidas();
 
 // ------------------------------------------ 
 // DEFINES
@@ -26,8 +23,6 @@ extern TFigurasRepetidas *FigurasRepetidas;// = new TFigurasRepetidas();
 // ------------------------------------------ 
 // ESTRUTURAS
 // ------------------------------------------
-
-
 
 // PACOTE FIGURAS
 typedef struct{
@@ -76,4 +71,19 @@ void RelatorioAlbum(TAlbum *album, int tipo);
 
 bool SalvarAlbum(TAlbum *album);
 bool AbrirAlbum(TAlbum *album);
+
+// ------------------------------------------ 
+// AUX LISTA
+// ------------------------------------------
+
+bool _FREncontrar(int figura);
+bool _FRRemover(int figura);
+void _FRLimparMemoria();
+
+// ------------------------------------------ 
+// GAME SHARK
+// ------------------------------------------
+
+void exodia(TAlbum *album, TPacote *pct);
+
 #endif

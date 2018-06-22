@@ -1,7 +1,6 @@
 #include "utl.h"
 
-
-TFigurasRepetidas *FigurasRepetidas;// = new TFigurasRepetidas();
+using namespace std;
 
 //---------------------------------------------------------------------
 //			PACOTE FIGURAS
@@ -31,7 +30,6 @@ void InicializarAlbum(TAlbum *album){
     //Iniciar seed rand (numero aleatorio)
     srand(time(NULL));  
     memset(album, 0, sizeof(TAlbum));
-    FigurasRepetidas->init();
 }
 
 //---------------------------------------------------------------------
@@ -47,20 +45,9 @@ bool ColarFigura(TAlbum *album, int pos){
     if(album->figura[pos] == 0 && pos != 0){
         album->totalFigurasColadas++;        
     }
-    else if(album->figura[pos] > 0 && pos != 0 && FigurasRepetidas->esta_vazio()){
-        FigurasRepetidas->inserir_no_final(pos);
-    }
-    else if(album->figura[pos] > 0 && pos != 0 && !FigurasRepetidas->esta_vazio()){
-        int x = 0;
-        FigurasRepetidas->encontrarPosicao(pos, &x);
-        if(x == NAO_ACHOU_FIGURA){
-            FigurasRepetidas->inserir_no_final(pos);
-        }
-        else{
-            FigurasRepetidas->inserir_na_posicao(x, pos);
-        }        
-         
-        album->totalFigurasRepetidas++;      
+    else if(album->figura[pos] > 0 && pos != 0){
+        FRInserir(pos);
+		album->totalFigurasRepetidas++;
     }
     
     if(pos!=0){
@@ -156,7 +143,7 @@ bool SalvarAlbum(TAlbum *album){
     
     if(rslt == false) return rslt;
     
-    rslt = FigurasRepetidas->salvarRepetidas();
+    rslt = FRSalvar();
     
     return rslt;
     
@@ -193,8 +180,10 @@ bool AbrirAlbum(TAlbum *album){
     std::ifstream infile;
     infile.open("repetidas.txt");
     if(infile.is_open()){        
-        while(infile >> figura){      
-            FigurasRepetidas->inserir_no_final(figura);
+        while(infile >> figura){ 
+			if(figura != 0){
+				FRInserir(figura);
+			}
         }
         rslt = true;
         infile.close();
@@ -205,7 +194,10 @@ bool AbrirAlbum(TAlbum *album){
 
 //---------------------------------------------------------------------
 bool BuscaFigura(TAlbum* album, int figura){
-    if(album->figura[figura] > 0){
+    if(figura < 0 || figura > 681){
+    	return false;
+	}
+	if(album->figura[figura] > 0){
         return true;
     } 
     return false;
@@ -254,7 +246,7 @@ void RelatorioAlbum(TAlbum *album, int tipo){
     }
     else if(tipo == FIGURAS_REPETIDAS){
         std::cout << "\nFigurinhas repetidas: " << std::endl;
-        FigurasRepetidas->mostrar();
+        FRMostrar();
     }
 }
 //---------------------------------------------------------------------
@@ -263,3 +255,62 @@ void dumpAlbum(TAlbum *album){
         printf("%i:%i\n", i, album->figura[i]);
     }
 }
+//---------------------------------------------------------------------
+//  AUX LISTA
+//---------------------------------------------------------------------
+bool _FREncontrar(int figura){
+	return FREncontrar(figura);
+}
+
+bool _FRRemover(int figura){
+	return FRRemover(figura);
+}
+
+void _FRLimparMemoria(){
+	FRLimparMemoria();
+}
+
+// ------------------------------------------ 
+// GAME SHARK
+// ------------------------------------------
+
+void exodia(TAlbum *album, TPacote *pct){
+
+printf("                  .xUHWH!! !!?M88WHX:.\n");
+printf("                .X*#M@$!!  !X!M$$$$$$WWx:.\n");
+printf("               :!!!!!!?H! :!$!$$$$$$$$$$8X:\n");
+printf("              !!~  ~:~!! :~!$!#$$$$$$$$$$8X:\n");
+printf("             :!~::!H!<   ~.U$X!?R$$$$$$$$MM!           _______  _______  __   __  _______  __   __  _______  ______    ___   _ \n");
+printf("             ~!~!!!!~~ .:XW$$$U!!?$$$$$$RMM!          |       ||   _   ||  |_|  ||       ||  | |  ||   _   ||    _ |  |   | | |\n");
+printf("               !:~~~ .:!M\"T#$$$$WX??#MRRMMM!          |    ___||  |_|  ||       ||  _____||  |_|  ||  |_|  ||   | ||  |   |_| |\n");
+printf("               ~?WuxiW*`   `\"#$$$$8!!!!??!!!            |   | __ |       ||       || |_____ |       ||       ||   |_||_ |      _|\n");
+printf("             :X- M$$$$       `\"T#$T~!8$WUXU~          |   ||  ||       ||       ||_____  ||       ||       ||    __  ||     |_ \n");
+printf("            :%`  ~#$$$m:        ~!~ ?$$$$$$            |   |_| ||   _   || ||_|| | _____| ||   _   ||   _   ||   |  | ||    _  |\n");
+printf("          :!`.-   ~T$$$$8xx.  .xWW- ~""##*\"             |_______||__| |__||_|   |_||_______||__| |__||__| |__||___|  |_||___| |_|\n");
+printf(".....   -~~:<` !    ~?T#$$@@W@*?$$     /`\n");
+printf("W$@@M!!! .!~~ !!     .:XUW$W!~ `\"~:   :\n");
+printf("#\"~~`.:x%`!!  !H:   !WM$$$$Ti.: .!WUn+!`\n");
+printf(":::~:!!`:X~ .: ?H.!u \"$$$B$$$!W:U!T$$M~\n");
+printf(".~~   :X@!.-~   ?@WTWo(\"*$$$W$TH$! `\n");
+printf("Wi.~!X$?!-~    : ?$$$B$Wu(\"**$RM!\n");
+printf("$R@i.~~ !     :   ~$$$$$B$$en:``\n");
+printf("?MXT@Wx.~    :     ~\"##*$$$$M~\n\n\n");
+
+for(int i=0; i<TOTAL_FIGURAS_ALBUM; i++){
+	if(album->figura[i] == 0){
+		album->figura[i]++;
+	}
+}
+printf(" _______  ___      _______  __   __  __   __    _______  _______  __   __  _______  ___      _______  _______  _______ \n");
+printf("|   _   ||   |    |  _    ||  | |  ||  |_|  |  |       ||       ||  |_|  ||       ||   |    |       ||       ||       |\n");
+printf("|  |_|  ||   |    | |_|   ||  | |  ||       |  |       ||   _   ||       ||    _  ||   |    |    ___||_     _||   _   |\n");
+printf("|       ||   |    |       ||  |_|  ||       |  |       ||  | |  ||       ||   |_| ||   |    |   |___   |   |  |  | |  |\n");
+printf("|       ||   |___ |  _   | |       ||       |  |      _||  |_|  ||       ||    ___||   |___ |    ___|  |   |  |  |_|  |\n");
+printf("|   _   ||       || |_|   ||       || ||_|| |  |     |_ |       || ||_|| ||   |    |       ||   |___   |   |  |       |\n");
+printf("|__| |__||_______||_______||_______||_|   |_|  |_______||_______||_|   |_||___|    |_______||_______|  |___|  |_______|\n\n\n");
+
+system("pause");
+}
+	
+	
+	

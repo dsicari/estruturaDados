@@ -1,7 +1,11 @@
 #include <iostream>
-#include "lista.h"
 
 using namespace std;
+
+typedef struct NO {
+   int valor;
+   struct NO* prox;
+}*LISTA;
 
 static LISTA head = NULL;
 static LISTA tail = NULL;
@@ -106,7 +110,7 @@ bool FREncontrar(int x){
 }
 
 //---------------------------------------------------------------------
-int FREncontrarPosicao(int x){
+void FREncontrarPosicao(int x, int *idx){
     int i=1;
     temp = head;
     while (temp->prox != NULL && temp->valor != x) {
@@ -115,11 +119,11 @@ int FREncontrarPosicao(int x){
     }
     if(temp->valor == x)
     {
-        return i;
+        *idx = i;
     }
     else if(temp->prox == NULL)
     {
-        return -1;
+        *idx = -1;
     }
 }
 

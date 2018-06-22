@@ -1,0 +1,1 @@
+g++ main.cpp utl.cpp lista.cpp -o albumcopa -trigraphs

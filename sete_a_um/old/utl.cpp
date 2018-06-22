@@ -1,9 +1,168 @@
 #include "utl.h"
-#include <stdlib.h>     /* srand, rand */
-#include <time.h>       /* time */
-#include <stdio.h>
-#include <cstring>
-#include <iostream>
+
+using namespace std;
+
+// Variaveis lista
+static LISTA head = NULL;
+static LISTA tail = NULL;
+static LISTA temp = NULL;
+
+//---------------------------------------------------------------------
+//			LISTA REPETIDAS
+//---------------------------------------------------------------------
+bool FREstaVazio(){
+    return head == NULL;
+}
+
+//---------------------------------------------------------------------
+void FRInserir(int x){
+    temp = new NO;
+    temp->valor = x;
+    if(FREstaVazio()){
+        temp->prox = NULL;
+        tail = temp;
+    } else {
+        temp->prox = head;
+    }
+    head = temp;
+}
+
+//---------------------------------------------------------------------
+void FRInserirNoFinal(int x){
+    temp = new NO;
+    temp->valor = x;
+    temp->prox = NULL;
+    if(FREstaVazio()){
+        head = temp;
+        tail = temp;
+    } else {
+        tail->prox = temp;
+        tail = temp;
+    }
+}
+
+//---------------------------------------------------------------------
+void FRInserirPosicao(int posicao, int valor){
+    LISTA temp2;
+    int x = posicao;
+    if(FREstaVazio()){
+        cout << "Lista vazia " << endl;
+    } else {
+        if(posicao == 0) {
+            FRInserir(valor);
+        }
+        temp = head;
+        x--;
+        while (temp->prox != NULL && x != 0) {
+            x--;
+            temp = temp->prox;
+        }
+        if(temp->prox != NULL) {
+            temp2 = new NO;
+            temp2->valor = valor;
+            temp2->prox = temp->prox;
+            temp->prox = temp2;
+        }
+    }
+}
+
+//---------------------------------------------------------------------
+bool FRRemover(int x){
+    temp = head;
+    NO *prev;
+    bool rslt = false;
+    while(temp->prox != NULL && temp->valor != x){
+        prev = temp;
+        temp = temp->prox;
+    }
+    
+    if(temp->valor == x) {
+        prev->prox = temp->prox;
+        delete temp;
+        rslt = true;
+    }
+    else if(temp->prox == NULL)
+    {
+        rslt = false;
+    }
+    return rslt;
+}
+
+//---------------------------------------------------------------------
+bool FREncontrar(int x){
+    int i=1;
+    temp = head;
+    while (temp->prox != NULL && temp->valor != x) {
+        temp = temp->prox;
+        i++;
+    }
+    if(temp->valor == x)
+    {
+        return true;
+    }
+    else if(temp->prox == NULL)
+    {
+        return false;
+    }
+}
+
+//---------------------------------------------------------------------
+int FREncontrarPosicao(int x){
+    int i=1;
+    temp = head;
+    while (temp->prox != NULL && temp->valor != x) {
+        temp = temp->prox;
+        i++;
+    }
+    if(temp->valor == x)
+    {
+        return i;
+    }
+    else if(temp->prox == NULL)
+    {
+        return -1;
+    }
+}
+
+//---------------------------------------------------------------------
+void FRMostrar(){
+    if(!FREstaVazio()) {
+        for(temp = head; temp != NULL; temp=temp->prox){
+            cout << temp->valor << " ";
+        }
+        cout << endl;
+    } else {
+        cout << "Lista vazia !" << endl;
+    }
+}
+
+//---------------------------------------------------------------------
+bool FRSalvar(){
+    FILE *file = fopen("repetidas.txt", "w");
+    if(file != NULL) {
+        if(!FREstaVazio()) {
+            for(temp = head; temp != NULL; temp=temp->prox){
+                fprintf(file, "%i\n", temp->valor);
+            }
+        } 
+        fclose(file);
+        return true;
+    }
+    return false;    
+}
+
+//---------------------------------------------------------------------
+void FRLimparMemoria(){
+    LISTA thanos;
+    delete temp;
+    delete tail;
+    while (head->prox != NULL) {
+        thanos = head;
+        head = head->prox;
+        thanos->prox = NULL;
+        delete thanos;
+    }
+}
 
 //---------------------------------------------------------------------
 //			PACOTE FIGURAS
@@ -31,25 +190,8 @@ void ImprimePacote(TPacote *pct)
 //---------------------------------------------------------------------
 void InicializarAlbum(TAlbum *album){
     //Iniciar seed rand (numero aleatorio)
-    srand(time(NULL));    
-    int i;
-    for(i = 0; i <= TOTAL_FIGURAS_ALBUM; i++){
-        album->figura[i].contem = false;
-        album->figura[i].numero = i;
-        album->figura[i].repetida = false;
-        album->figura[i].qtdeRepetida = 0;
-    }
-    // *** 
-    //     CODIGO TA COM O DEMONIO, NAO ASSIMILA DIREITO 
-    //     TOTAL FIGURAS E POSICAO 681 
-    // ***     
-    album->figura[681].contem = false;
-    album->figura[681].numero = i;
-    album->figura[681].repetida = false;
-    album->figura[681].qtdeRepetida = 0;
-    //Se colocar totalFiguras antes assimila 682
-    album->totalFiguras = 0; 
-
+    srand(time(NULL));  
+    memset(album, 0, sizeof(TAlbum));
 }
 
 //---------------------------------------------------------------------
@@ -58,62 +200,45 @@ int TamanhoAlbum(TAlbum *album){
 }
 
 //---------------------------------------------------------------------
-            /* CODIGO ZUADO, DESCONSIDERAR */
-//---------------------------------------------------------------------
-/*bool ColarFigura(TAlbum *album, int figura){
-    int pos = TamanhoAlbum(album);
-    
-    if(album->totalFiguras >= TOTAL_FIGURAS_ALBUM) {
+bool ColarFigura(TAlbum *album, int pos){  
+    if(pos < 0 && pos > 681){
         return false;
-    }   
-    
-    int r = BuscaFigura(album, figura);
-    if(r == NAO_ACHOU_FIGURA){
-        while(pos > 0 && album->figura[pos-1].numero > figura) {
-            album->figura[pos] = album->figura[pos-1];
-            pos--;
+    }
+    if(album->figura[pos] == 0 && pos != 0){
+        album->totalFigurasColadas++;        
+    }
+    else if(album->figura[pos] > 0 && pos != 0 && FREstaVazio()){
+        FRInserirNoFinal(pos);
+    }
+    else if(album->figura[pos] > 0 && pos != 0 && !FREstaVazio()){
+        int x = FREncontrarPosicao(pos);
+        if(x == NAO_ACHOU_FIGURA){
+            FRInserirNoFinal(pos);
         }
-        album->figura[pos].numero = figura;    
-        album->totalFiguras++;
-    }
-    /*while(pos > 0 && album->figura[pos-1].numero > figura) {
-        album->figura[pos] = album->figura[pos-1];
-        pos--;
+        else{
+            FRInserirPosicao(x, pos);
+        }        
+         
+        album->totalFigurasRepetidas++;      
     }
     
-    int r = BuscaFigura(album, figura);
-    if(r == NAO_ACHOU_FIGURA){
-        album->figura[r].numero = figura;
-        album->figura[r].contem = true;
-        album->figura[r].qtdeRepetida = 0;
+    if(pos!=0){
         album->totalFiguras++;
     }
-    else{
-        album->figura[r].repetida = true;
-        album->figura[r].qtdeRepetida++;
-    }
-    return true;
-}*/
-
-//---------------------------------------------------------------------
-bool ColarFigura(TAlbum *album, int pos){    
-    if(!album->figura[pos].contem){
-        album->figura[pos].contem = true;
-        album->figura[pos].qtdeRepetida = 0;
-        album->totalFiguras++;
-    }
-    else{
-        album->figura[pos].repetida = true;
-        album->figura[pos].qtdeRepetida++;
-    }
+    
+    album->figura[pos]++; 
+    
+      
     return true;
 }
+
 //---------------------------------------------------------------------
 void ColarPacote(TAlbum *album, TPacote *pct){
     int i;
     for(i = 0; i < TOTAL_FIGURAS_PACOTE; i++){
         ColarFigura(album, pct->figura[i]);
     }
+    album->pacotesAbertos++;
 }
 
 //---------------------------------------------------------------------
@@ -131,40 +256,124 @@ void ImprimirAlbum(TAlbum *album){
                                                                                                    
     int i;
     int count = 0;
-    for(i = 0 ; i <= TOTAL_FIGURAS_ALBUM; i++) { 
-        if(album->figura[i].contem){
+    for(i = 0 ; i < TOTAL_FIGURAS_ALBUM; i++) { 
+        if(album->figura[i] > 0){
             printf("\n\t\t--------------------------------------------------------\n");
             printf("\t\t|\tIDX\t|\tFIGURA\t|\tREPETIDAS\t|\n");
-            printf("\t\t|\t%i\t|\t%i\t|\t%i\t\t|", count++, album->figura[i].numero, album->figura[i].qtdeRepetida);
+            printf("\t\t|\t%i\t|\t%i\t|\t%i\t\t|", count++, i, (album->figura[i] - 1));
         }        
     }
     printf("\n\t\t--------------------------------------------------------\n");
 }
 
 //---------------------------------------------------------------------
-int BuscaFigura(TAlbum* album, int figura){
-    int esq, dir, meio;
-    esq = 0;
-    dir = TOTAL_FIGURAS_ALBUM;//;
-    while(esq <= dir) {
-        meio = ((esq + dir) / 2);
-        if(figura == album->figura[meio].numero) {
-            if(album->figura[meio].contem){
-                return meio;   
-            }
-            else{
-                break;
-            }            
-        } else {
-            if(album->figura[meio].numero < figura){
-                esq = meio + 1;
-            } else {
-                dir = meio + 1;
+void ImprimirFigura(TAlbum *album, int pos){
+    printf(" figura %i qtde: %i\n", pos, album->figura[pos]);
+}
+
+//---------------------------------------------------------------------
+bool SalvarAlbum(TAlbum *album){
+    bool rslt = false;
+    FILE * file = fopen("album.alb", "wb");
+    if(file != NULL) {
+        int r = fwrite(album, sizeof(TAlbum), 1, file);
+        if(r != 0){
+            printf("Album salvo com sucesso!\n");
+            rslt = true;
+        }
+        else{
+            printf("Erro ao salvar album!\n");  
+        }        
+        fclose(file);
+    }  
+    
+    if(rslt == false) return rslt;
+    
+    file = fopen("faltantes.txt", "w");
+    if(file != NULL) {
+        for(int i = 1; i < TOTAL_FIGURAS_ALBUM; i++){
+            if(album->figura[i] == 0){              
+                fprintf(file, "%i\n", i);
             }
         }
+        fclose(file);
+        rslt = true;
     }
-    return -1;
+    
+    if(rslt == false) return rslt;
+    
+    file = fopen("eu_tenho.txt", "w");
+    if(file != NULL) {
+        for(int i = 1; i < TOTAL_FIGURAS_ALBUM; i++){
+            if(album->figura[i] > 0){              
+                fprintf(file, "%i\n", i);
+            }
+        }
+        fclose(file);
+        rslt = true;
+    }
+    
+    if(rslt == false) return rslt;
+    
+    rslt = FRSalvar();
+    
+    return rslt;
+    
 }
+
+//---------------------------------------------------------------------
+bool AbrirAlbum(TAlbum *album){
+    bool rslt = false;
+    FILE * file= fopen("album.alb", "rb");
+    if (file != NULL) {
+        std::cout << "arquivo album.alb aberto!" << std::endl;
+        fread(album, sizeof(TAlbum), 1, file);
+        int totalFiguras = 0;
+        for(int i = 1; i < TOTAL_FIGURAS_ALBUM; i++){
+            if(album->figura[i] > 0){
+                totalFiguras = totalFiguras + album->figura[i];
+            }
+        }
+        
+        if(totalFiguras == album->totalFiguras){
+            rslt = true;
+            std::cout << "OK: Figuras contadas = " << totalFiguras << " x " << album->totalFiguras << std::endl;
+        }
+        else{
+            std::cout << "ERROR: Diferenca figuras contadas = " << totalFiguras << " x " << " " << album->totalFiguras << std::endl;
+        }
+        fclose(file);
+    }
+    
+    if(rslt == false) return rslt;
+    
+    // Abrir monte figuras repetidas
+    int figura = 0;
+    std::ifstream infile;
+    infile.open("repetidas.txt");
+    if(infile.is_open()){        
+        while(infile >> figura){      
+            FRInserirNoFinal(figura);
+        }
+        rslt = true;
+        infile.close();
+    }
+    
+    return rslt;
+}
+
+//---------------------------------------------------------------------
+bool BuscaFigura(TAlbum* album, int figura){
+    if(figura < 0 || figura > 681){
+    	return false;
+	}
+	if(album->figura[figura] > 0){
+        return true;
+    } 
+    return false;
+}
+
+
 //---------------------------------------------------------------------
 void IrABanca(TAlbum *album, TPacote *pct, int times){
     for(int i = 0; i < times; i++){
@@ -182,23 +391,37 @@ void IrABanca(TAlbum *album, TPacote *pct, int times){
 void RelatorioAlbum(TAlbum *album, int tipo){
     // tipo 1: FIGURAS_COLADAS  Relatorio Figuras Coladas
     // tipo 2: FIGURAS_FALTANDO Relatorio Figuras Faltando
-    printf("\nRelatorio Album\n");
-    printf("Completo: %i / 681", album->totalFiguras);
+    printf("\nRelatorio Album");
+    printf("\nCompleto: %i / 681", album->totalFigurasColadas);
+    printf("\nTotal figuras: %i", album->totalFiguras);
+    printf("\nTotal figuras repetidas: %i", album->totalFigurasRepetidas);
+    printf("\nTotal pacotes abertos: %i", album->pacotesAbertos);
     if(tipo == FIGURAS_COLADAS){
         printf("\nFiguras Coladas: ");
-        for(int i = 1; i <= TOTAL_FIGURAS_ALBUM; i++){
-            if(album->figura[i].contem){                
-                printf("%i ", album->figura[i].numero);
+        //Figura 0 -> Figura que faltou ao abrir pacote, nao vai para relatorio
+        for(int i = 1; i < TOTAL_FIGURAS_ALBUM; i++){
+            if(album->figura[i] > 0){                
+                printf("%i ", i);
             }
         }
     }
-    else{
+    else if(tipo == FIGURAS_FALTANDO){
         printf("\nFiguras Faltando: ");
-        for(int i = 1; i <= TOTAL_FIGURAS_ALBUM; i++){
-            if(!album->figura[i].contem){                
-                printf("%i ", album->figura[i].numero);
+        //Figura 0 -> Figura que faltou ao abrir pacote, nao vai para relatorio
+        for(int i = 1; i < TOTAL_FIGURAS_ALBUM; i++){
+            if(album->figura[i] == 0){                
+                printf("%i ", i);
             }
         }
+    }
+    else if(tipo == FIGURAS_REPETIDAS){
+        std::cout << "\nFigurinhas repetidas: " << std::endl;
+        FRMostrar();
     }
 }
-
+//---------------------------------------------------------------------
+void dumpAlbum(TAlbum *album){
+    for(int i = 0; i < TOTAL_FIGURAS_ALBUM; i++){
+        printf("%i:%i\n", i, album->figura[i]);
+    }
+}

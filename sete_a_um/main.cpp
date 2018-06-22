@@ -1,16 +1,12 @@
+#include <locale.h>
 #include <iostream>
 #include <conio.h>
 #include "utl.h"
 
-
 using namespace std;
 
-
-
-using namespace std;
-
-int MainMenu(){
-    //system("cls");
+int MainMenu(){	
+	system("cls"); //Clear tela ao voltar menu
     int opt = 0;
     cout << "\nMENU ALBUM COPA\n";
     cout << "1 - Ir a banca\n";
@@ -33,9 +29,12 @@ int MainMenu(){
     return opt;
 }
 
-
+//---------------------------------------------------------------------
 int main()
 {
+	setlocale(LC_ALL, "Portuguese");
+	system("color 0F");
+	
     int r = 0;
     TPacote Pacote;        
     TAlbum Album;
@@ -43,24 +42,33 @@ int main()
     InicializarAlbum(&Album);    
     
     do{       
-        r = MainMenu(); 
-        if( r == 1){
+        r = MainMenu();
+		system("cls"); // Clear tela ao escolher menu         
+        if( r == 1){        	
             int num = 0;
+            cout << "--> IR A BANCA <--" << endl;
             cout << "\nDigite a qtde de pacotes para comprar: ";
             cin >> num;
             IrABanca(&Album, &Pacote, num);
+            system("pause");
         }
         else if(r == 2){
+        	cout << "--> ABRIR PACOTE FIGURINHAS <--" << endl;
             AbrePacoteFigura(&Pacote); 
             cout << "Pacote contem: "; ImprimePacote(&Pacote); 
+            printf("\n"); system("pause");
         }
-        else if(r == 3){          
+        else if(r == 3){   
+			cout << "--> COLAR PACOTE FIGURINHAS <--" << endl;       
             ColarPacote(&Album, &Pacote);
+            system("pause");
         } 
         else if(r == 4){
             ImprimirAlbum(&Album);
+            printf("\n"); system("pause");
         }
         else if(r == 5){
+        	cout << "--> PESQUISAR FIGURINHA <--" << endl;
             int fig = 0;
             cout << "\nDigite a figurinha a ser pesquisada: ";
             cin >> fig;
@@ -69,67 +77,82 @@ int main()
             }
             else{
                 cout << "Figurinha nÃ£o encontrada!" << endl;
-            }                
+            }   
+			printf("\n"); system("pause");             
         }
         else if(r == 6){
+        	cout << "--> RELATORIO ALBUM FIGURINHAS COLADAS <--" << endl;
             RelatorioAlbum(&Album, FIGURAS_COLADAS);
+            printf("\n"); system("pause");
         }
         else if(r == 7){
+        	cout << "--> RELATORIO ALBUM FIGURINHAS FALTANDO <--" << endl;
             RelatorioAlbum(&Album, FIGURAS_FALTANDO);
+            printf("\n"); system("pause");
         }
         else if(r == 8){
+        	cout << "--> SALVAR ALBUM COPA <--" << endl;
             SalvarAlbum(&Album);
+            printf("\n"); system("pause");
         }
         else if(r == 9){
+        	cout << "--> CARREGAR ALBUM COPA <--" << endl;
             if(AbrirAlbum(&Album)){
                 cout << "Album carregado com sucesso!" << endl;
             }
             else{
                 cout << "Falha ao carregar album" << endl;
             }
+            printf("\n"); system("pause");
         }
         else if(r == 10){
+        	cout << "--> RELATORIO ALBUM FIGURINHAS REPETIDAS <--" << endl;
             RelatorioAlbum(&Album, FIGURAS_REPETIDAS);
+            printf("\n"); system("pause");
         }
         else if(r == 11){
+        	cout << "--> PESQUISAR FIGURINHA REPETIDA <--" << endl;
             int figura = 0;
             cout << "Digite a figurinha a pesquisar no monte de repetidas: ";
             cin >> figura;
-            if(FigurasRepetidas->encontrar(figura)){
+            if(_FREncontrar(figura)){
                 cout << "Figurinha encontrada!" << endl;
             }
             else{
                 cout << "Figurinha nao encontrada!" << endl;
             }
+            printf("\n"); system("pause");
         }
         else if(r == 12){
+        	cout << "--> REMOVER FIGURINHA FIGURINHA REPETIDA <--" << endl;
             int figura = 0;
             cout << "Qual figurinha deseja remover do monte de repetidas? Figurinha: ";
-            cin >> figura;
-            if(FigurasRepetidas->encontrar(figura)){
-                cout << "Figurinha encontrada!" << endl;
-                if(FigurasRepetidas->remover(figura)){
-                    cout << "Figurinha removida com sucesso!";
-                }
-                else{
-                    cout << "Erro ao tentar remover figurinha!";
-                }
-            }
-            else{
-               cout << "Figurinha nao encontrada no monte de repetidas!" << endl;
-            }
+            cin >> figura;            
+			if(_FRRemover(figura)){                	
+				cout << "Figurinha removida com sucesso!";
+				Album.totalFiguras--;
+				Album.totalFigurasRepetidas--;
+				Album.figura[figura]--;
+			}
+			else{
+				cout << "Erro ao tentar remover figurinha. Voce nao tem ela repetida!!";
+			}            
+            printf("\n"); system("pause");
         }
         else if(r == 13){
+        	cout << "--> TROCAR FIGURINHA <--" << endl;
             int figura = 0, repetida = 0;
             cout << "Qual figurinha voce vai receber? Figura: ";
             cin >> figura;
             if(BuscaFigura(&Album, figura) == false){
                 cout << "Qual figurinha voce vai fornecer? Figura: ";
                 cin >> repetida;
-                if(FigurasRepetidas->encontrar(repetida)){
-                    FigurasRepetidas->remover(repetida);
-                    
+                if(_FREncontrar(repetida)){
+                    _FRRemover(repetida);                    
                     ColarFigura(&Album, figura);
+					Album.figura[repetida]--;
+                    Album.totalFigurasRepetidas--;
+                    Album.totalFigurasColadas++;
                     cout << "Parabens, agora voce possui a figurinha " << figura << endl;
                     printf("\nCompleto: %i / 681", Album.totalFigurasColadas);
                     printf("\nTotal figuras: %i", Album.totalFiguras);
@@ -142,14 +165,24 @@ int main()
             else{
                 cout << "ERRO: Voce ja tem esta figura colada!";
             }
-                
+            printf("\n"); system("pause");
         }
         else if(r == 14){
+        	cout << "--> DUMP ALBUM <--" << endl;
             dumpAlbum(&Album);
+            printf("\n"); system("pause");
         }
+		else if(r == 666){
+			system("color 0A");
+			exodia(&Album, &Pacote);
+			system("color 0F");
+		}
     }while(r != 0);
     
-    // _FIX_ FigurasRepetidas->limpar_memorias();
+    cout << "Limpando a bagunça na memoria..." << endl;    
+    _FRLimparMemoria();
+    cout << "OK!" << endl;
+    system("pause");
     return 0;
 }
 
